@@ -2,6 +2,36 @@ import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import litLogo from './assets/lit.svg'
 import viteLogo from '/vite.svg'
+import { parse } from 'csv-parse/browser/esm';
+
+type Declension = [
+  [word: string, gender: string],
+  [nomHeading: string, sing: string, plural: string],
+  [genHeading: string, sing: string, plural: string],
+  [dativeHeading: string, sing: string, plural: string],
+  [ablativeHeading: string, sing: string, plural: string],
+  [vocativeHeading: string, sing: string, plural: string] | undefined,
+]
+
+interface ParseResult<T> {
+  value: T,
+  err: unknown,
+  info: unknown,
+}
+
+async function fetchParadigm<T>(urlOrPromise: string | Promise<{ default: string }>) {
+  const urlOrModule = await urlOrPromise;
+  const url: string = typeof urlOrModule === "string" ? urlOrModule : urlOrModule.default;
+  return fetch(url).then((res) => res.text()).then((firstDeclensionCsv) => {
+    return new Promise<ParseResult<T>>((res) => {
+      parse(firstDeclensionCsv, (err, value, info) => {
+        res({ value, err, info })
+      })
+    })
+  })
+}
+
+fetchParadigm<Declension>(import("./paradigms/0-0-1st-declension-rosa.csv?url")).then(console.log)
 
 /**
  * An example element.
