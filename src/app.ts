@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js'
 import litLogo from './assets/lit.svg'
 import viteLogo from '/vite.svg'
 import { parse } from 'csv-parse/browser/esm';
+import { dispatch, store } from './store';
+import { setText } from './store/csv';
 
 type Declension = [
   [word: string, gender: string],
@@ -31,7 +33,14 @@ async function fetchParadigm<T>(urlOrPromise: string | Promise<{ default: string
   })
 }
 
-fetchParadigm<Declension>(import("./paradigms/0-0-1st-declension-rosa.csv?url")).then(console.log)
+store.subscribe(() => {
+  console.log(store.getState())
+
+})
+
+fetchParadigm<Declension>(import("@/paradigms/0-0-1st-declension-rosa.csv?url")).then((declension) => {
+  dispatch(setText({ title: "1st Declension", body: declension }))
+})
 
 /**
  * An example element.
